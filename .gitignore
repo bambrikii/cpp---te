@@ -1,6 +1,12 @@
+# https://stackoverflow.com/questions/5711120/gitignore-binary-files-that-have-no-extension
 *
-!*.*
+!*/
 .vscode
 .idea
 build
 CMakeFiles
+!*.cpp
+!*.hpp
+!*.cmake
+!CmakeLists.txt
+!Makefile

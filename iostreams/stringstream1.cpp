@@ -13,6 +13,9 @@ private:
     string prop1;
 
 public:
+    Cls1(string &prop1) : prop1(prop1)
+    {
+    }
     Cls1(string &&prop1) : prop1(move(prop1))
     {
     }
@@ -53,11 +56,37 @@ void ostream_template1()
     cout << cls1 << ", " << Cls1("prop1 2 value") << endl;
 }
 
+template <typename charT, typename traits>
+basic_istream<charT, traits> &
+operator>>(basic_istream<charT, traits> &strm, Cls1 &cls1)
+{
+    string str1;
+    string str2;
+
+    strm >> str1;
+    strm >> str2;
+
+    cls1 = Cls1(str1 + "+" + str2);
+
+    return strm;
+}
+
+void istream_template1()
+{
+    cout << "istream template" << endl;
+
+    istringstream istream("val1\nval2");
+    Cls1 cls1("initial value");
+    istream >> cls1;
+    cout << cls1 << endl;
+}
+
 int main(int argc, char const *argv[])
 {
 
     ostream1();
     ostream_template1();
+    istream_template1();
 
     return 0;
 }
