@@ -2,6 +2,14 @@
 #include <fstream>
 #include <string>
 #include <streambuf>
+#include <cstdio>
+#include <cstring>
+// for read():
+#ifdef _MSC_VER
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 using namespace std;
 
@@ -88,6 +96,54 @@ void custom_out1()
     cout << str << endl;
 }
 
+class custom_inbuf : public streambuf
+{
+protected:
+    static const int buf_size = 10;
+    static const int chunk = 4;
+    char buf[buf_size];
+
+public:
+    custom_inbuf(string &&str)
+    {
+        setg(buf + chunk, buf + chunk, buf + chunk);
+    }
+
+protected:
+    virtual int_type underflow()
+    {
+        if (gptr() < egptr())
+        {
+            return traits_type::to_int_type(*gptr());
+        }
+        int next = gptr() - eback();
+        if (next > chunk)
+        {
+            next = chunk;
+        }
+        int num = read(0, buf + chunk, buf_size - chunk);
+        if (num <= 0)
+        {
+            return EOF;
+        }
+
+        setg(buf + (chunk - next), buf + chunk, buf + chunk + num);
+        return traits_type::to_int_type(*gptr());
+    }
+};
+
+void custom_in()
+{
+    cout << "custom inbuffer" << endl;
+    custom_inbuf in1("line1");
+    istream is1(&in1);
+    ostream os1(&in1);
+    os1 << "line1" << endl;
+    string str;
+    is1 >> str;
+    cout << str << endl;
+}
+
 int main(int argc, char const *argv[])
 {
     file1();
@@ -95,6 +151,7 @@ int main(int argc, char const *argv[])
     buf1();
     iter1();
     custom_out1();
+    custom_in();
 
     return 0;
 }
